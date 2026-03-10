@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: ws-stomp
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/ws_reservation
+    username : root
+    password : asd798852!
