@@ -2,6 +2,7 @@ package com.ws_study.ws_stomp.service;
 
 import com.ws_study.ws_stomp.domain.Reservation;
 import com.ws_study.ws_stomp.dto.ReservationRequestDto;
+import com.ws_study.ws_stomp.exception.ReservationException;
 import com.ws_study.ws_stomp.repository.ReservationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,7 @@ public class ReservationService {
         //중복체크
         //existBy~는 boolean을 반환 -> 무조건 조건문
         if(reservationRepository.existsByStartAt(request.getStartAt())){
-            throw new IllegalArgumentException("이미 예약된 시간입니다.");
+            throw ReservationException.duplicated();
         }
 
         //endAt계산, Entity변환
