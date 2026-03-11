@@ -3,12 +3,15 @@ package com.ws_study.ws_stomp.service;
 import com.ws_study.ws_stomp.domain.Reservation;
 import com.ws_study.ws_stomp.dto.ReservationRequestDto;
 import com.ws_study.ws_stomp.dto.ReservedDatesResponseDto;
+import com.ws_study.ws_stomp.dto.ReservedTimesResponseDto;
 import com.ws_study.ws_stomp.exception.ReservationException;
 import com.ws_study.ws_stomp.repository.ReservationRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -49,5 +52,15 @@ public class ReservationService {
                 .map(entry -> entry.getKey())
                 .collect(Collectors.toList());
         return new ReservedDatesResponseDto(reservedDates);
+    }
+
+    //마감된 시간조회
+    public ReservedTimesResponseDto getReservedTimes(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
+        List<LocalTime> reservedTimes = reservationRepository.findAll()
+                .stream()
+                .filter(r -> r.getStartAt().toLocalDate().equals(date))
+                .map(r -> r.getStartAt().toLocalTime())
+                .collect(Collectors.toList());
+        return new ReservedTimesResponseDto(reservedTimes);
     }
 }
