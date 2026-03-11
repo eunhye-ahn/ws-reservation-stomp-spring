@@ -10,7 +10,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    //중복체크
+    //예약 생성 예외처리 => 중복체크(409),400
     @ExceptionHandler(ReservationException.class)
     public ResponseEntity<Map<String,String>> handleReservationException(ReservationException e) {
         return ResponseEntity
@@ -18,6 +18,18 @@ public class GlobalExceptionHandler {
                 .body(Map.of(
                         "code", e.getCode(),
                         "message", e.getMessage()
+                ));
+    }
+
+    //전역 500
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String,String>> handleException(Exception e) {
+        e.printStackTrace();
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of(
+                        "code", "INTERNAL_SERVER_ERROR",
+                        "message", "서버에 오류가 발생했습니다."
                 ));
     }
 }

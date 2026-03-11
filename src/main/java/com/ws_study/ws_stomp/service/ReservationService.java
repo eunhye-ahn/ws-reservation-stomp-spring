@@ -2,10 +2,16 @@ package com.ws_study.ws_stomp.service;
 
 import com.ws_study.ws_stomp.domain.Reservation;
 import com.ws_study.ws_stomp.dto.ReservationRequestDto;
+import com.ws_study.ws_stomp.dto.ReservedDatesResponseDto;
 import com.ws_study.ws_stomp.exception.ReservationException;
 import com.ws_study.ws_stomp.repository.ReservationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -31,5 +37,17 @@ public class ReservationService {
 
         //리포지토리의 세이브 호출
         reservationRepository.save(reservation);
+    }
+
+    //마감된 날짜 조회
+    public ReservedDatesResponseDto getReservedDates() {
+        List<LocalDate> reservedDates = reservationRepository.findAll()
+                .stream()
+                .collect(Collectors.groupingBy(r->r.getStartAt().toLocalDate()))
+                .entrySet().stream()
+                .filter(entry -> entry.getValue().size() ==3)
+                .map(entry -> entry.getKey())
+                .collect(Collectors.toList());
+        return new ReservedDatesResponseDto(reservedDates);
     }
 }
