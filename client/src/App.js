@@ -4,7 +4,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css'
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import ReservationModal from './component/ReservationModal';
-import { useSocket } from './hooks/useSocket';
+import { Client } from '@stomp/stompjs';
 
 const localizer = momentLocalizer(moment);
 
@@ -15,18 +15,19 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
 
-  const socketRef = useSocket();
-
   useEffect(() => {
-    //소켓 구독신청과 수신
-    socketRef.current.emit('subscribe:calendar')
-    socketRef.current.on('update:calendar', (data) => {
-      if (data.isFull) {
-        setReservedDates(prev => [...prev, data.date])
+    //stomp client 생성
+    const client = new Client({
+      brokerURL: 'ws://localhost:8080/ws',
+      onConnect: () => {
+        console.log('STOMP 연결')
+      },
+      onDisconnect: () => {
+        console.log('연결끊김')
       }
-    })
+    });
 
-
+    client.activate();
 
     const fetchReservedDates = async () => {
       try {
