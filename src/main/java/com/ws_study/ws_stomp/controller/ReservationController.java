@@ -1,33 +1,35 @@
 package com.ws_study.ws_stomp.controller;
 
-import com.ws_study.ws_stomp.domain.Reservation;
+
 import com.ws_study.ws_stomp.dto.ReservationRequestDto;
-import com.ws_study.ws_stomp.dto.ReservationResponseDto;
 import com.ws_study.ws_stomp.service.ReservationService;
-import lombok.Getter;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import java.util.Map;
+
 
 @RequiredArgsConstructor
-@RestController("/api/reservations")
+@RestController
+@RequestMapping("/api/reservations")
 public class ReservationController {
     private final ReservationService reservationService;
 
-
-    @GetMapping("/reserved-dates")
-    public List<ReservationResponseDto> getAllReservations() {
-        return reservationService.getFullDates();
-    }
-
+    //예약생성
     @PostMapping
-    public ReservationResponseDto createReservation(@RequestBody ReservationRequestDto reservationRequestDto) {
-
+    public ResponseEntity<?> create(@RequestBody ReservationRequestDto reservationRequestDto) {
+        reservationService.save(reservationRequestDto);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(Map.of(
+                        "code", "CREATED",
+                        "message", "예약완료"
+                ));
     }
-
 }

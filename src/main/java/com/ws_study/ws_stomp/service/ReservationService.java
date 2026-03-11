@@ -21,7 +21,10 @@ public class ReservationService {
         if(reservationRepository.existsByStartAt(request.getStartAt())){
             throw ReservationException.duplicated();
         }
-
+        //dto 누락
+        if(request.getStartAt()==null){
+            throw ReservationException.missingStartAt();
+        }
         //endAt계산, Entity변환
         reservation.setStartAt(request.getStartAt());
         reservation.setEndAt(request.getStartAt().plusHours(1));
