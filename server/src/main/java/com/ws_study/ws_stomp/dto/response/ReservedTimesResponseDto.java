@@ -1,4 +1,4 @@
-package com.ws_study.ws_stomp.dto;
+package com.ws_study.ws_stomp.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;

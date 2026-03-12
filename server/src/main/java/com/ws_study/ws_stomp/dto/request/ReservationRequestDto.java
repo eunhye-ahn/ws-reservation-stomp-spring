@@ -1,4 +1,4 @@
-package com.ws_study.ws_stomp.dto;
+package com.ws_study.ws_stomp.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
