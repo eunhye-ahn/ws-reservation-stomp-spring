@@ -3,15 +3,21 @@ import dayjs from "dayjs";
 
 const ALL_TIMES = ["10:00:00", "11:00:00", "12:00:00"];
 
-const ReservationModal = ({ date, onClose }) => {
+const ReservationModal = ({ date, client, onClose }) => {
     const [reservedTimes, setReservedTimes] = useState([]);
     const [selectedTime, setSelectedTime] = useState(null);
 
     // const { stompRef, subscribe } = useStomp();
 
     useEffect(() => {
-
-    }, []);
+        const selectedDate = dayjs(date).format("YYYY-MM-DD");
+        client.subscribe(`/topic/reservation/${selectedDate}`, (message) => {
+            const data = JSON.parse(message.body);
+            console.log(data.reservedTimes);
+            setReservedTimes(data.reservedTimes);
+            console.log(data.re)
+        })
+    }, [date]);
 
     const fetchReservedTimes = async (date) => {
         try {

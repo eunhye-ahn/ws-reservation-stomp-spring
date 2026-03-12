@@ -1,7 +1,7 @@
 import { Calendar, momentLocalizer } from 'react-big-calendar'
 import moment from 'moment'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import dayjs from 'dayjs';
 import ReservationModal from './component/ReservationModal';
 import { Client } from '@stomp/stompjs';
@@ -14,6 +14,8 @@ function App() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
+
+  const clientRef = useRef(null);
 
   useEffect(() => {
     //stomp 연결 초기화 (앱 진입시 1회)
@@ -29,6 +31,7 @@ function App() {
       }
     });
     client.activate();
+    clientRef.current = client;
 
     const fetchReservedDates = async () => {
       try {
@@ -76,7 +79,9 @@ function App() {
         selectable
         onSelectSlot={handleDateClick}
       />
-      {isOpen && <ReservationModal date={selectedDate} onClose={() => { setIsOpen(false) }} />}
+      {isOpen && <ReservationModal date={selectedDate}
+        client={clientRef.current}
+        onClose={() => { setIsOpen(false) }} />}
     </div>
   );
 }
