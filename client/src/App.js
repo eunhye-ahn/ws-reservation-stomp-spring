@@ -16,17 +16,18 @@ function App() {
   const [selectedDate, setSelectedDate] = useState(null);
 
   useEffect(() => {
-    //stomp client 생성
+    //stomp 연결 초기화 (앱 진입시 1회)
     const client = new Client({
-      brokerURL: 'ws://localhost:8080/ws',
+      brokerURL: "ws://localhost:8080/ws",
       onConnect: () => {
-        console.log('STOMP 연결')
-      },
-      onDisconnect: () => {
-        console.log('연결끊김')
+        console.log("연결시작")
+        client.subscribe('/topic/reservation', (message) => {
+          const data = JSON.parse(message.body);
+          console.log(data);
+          setReservedDates(data.reservedDates);
+        })
       }
     });
-
     client.activate();
 
     const fetchReservedDates = async () => {

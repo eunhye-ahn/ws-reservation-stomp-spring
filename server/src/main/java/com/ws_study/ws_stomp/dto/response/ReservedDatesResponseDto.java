@@ -9,5 +9,7 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 public class ReservedDatesResponseDto {
+
+
     private List<LocalDate> reservedDates;
 }

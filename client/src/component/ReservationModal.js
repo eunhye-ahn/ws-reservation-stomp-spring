@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
-import { io } from "socket.io-client";
-import { useSocket } from "../hooks/useSocket";
 
 const ALL_TIMES = ["10:00:00", "11:00:00", "12:00:00"];
 
@@ -9,15 +7,9 @@ const ReservationModal = ({ date, onClose }) => {
     const [reservedTimes, setReservedTimes] = useState([]);
     const [selectedTime, setSelectedTime] = useState(null);
 
-    const socketRef = useSocket();
+    // const { stompRef, subscribe } = useStomp();
 
     useEffect(() => {
-        const selectedDate = dayjs(date).format("YYYY-MM-DD")
-        socketRef.current.emit('subscribe:date', selectedDate);
-        socketRef.current.on('update:time', (data) => {
-            setReservedTimes(prev => [...prev, data.time]);
-            console.log(data);
-        })
 
     }, []);
 
@@ -35,16 +27,16 @@ const ReservationModal = ({ date, onClose }) => {
     useEffect(() => {
         fetchReservedTimes(date)
         setSelectedTime(null)
-    }, [date]);
+    }, []);
+
 
     //예약생성
     const fetchCreateReservation = async (time) => {
         const res = await fetch("http://localhost:8080/api/reservations", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ start_at: `${dayjs(date).format("YYYY-MM-DD")} ${time}` })
+            body: JSON.stringify({ start_at: `${dayjs(date).format("YYYY-MM-DD")}T${time}` })
         });
-        const data = await res.json();
     }
 
     const handleTimeClick = async (time) => {

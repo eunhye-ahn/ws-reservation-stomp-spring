@@ -11,5 +11,5 @@ import java.util.List;
 @Getter
 public class ReservedTimesResponseDto {
     @JsonFormat(pattern = "HH:mm:ss")
-    private List<LocalTime> reservedTime;
+    private List<LocalTime> reservedTimes;
 }

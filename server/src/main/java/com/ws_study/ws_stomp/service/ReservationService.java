@@ -4,12 +4,16 @@ import com.ws_study.ws_stomp.domain.Reservation;
 import com.ws_study.ws_stomp.dto.request.ReservationRequestDto;
 import com.ws_study.ws_stomp.dto.response.ReservedDatesResponseDto;
 import com.ws_study.ws_stomp.dto.response.ReservedTimesResponseDto;
+import com.ws_study.ws_stomp.event.ReservationEvent;
 import com.ws_study.ws_stomp.exception.ReservationException;
 import com.ws_study.ws_stomp.repository.ReservationRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -22,7 +26,8 @@ import java.util.stream.Collectors;
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final SimpMessagingTemplate messagingTemplate;
-
+    private final ApplicationEventPublisher applicationEventPublisher;
+    @Transactional
     public void save(ReservationRequestDto request) {
         Reservation reservation = new Reservation();
 
@@ -43,9 +48,14 @@ public class ReservationService {
         reservationRepository.save(reservation);
 
         LocalDate date = request.getStartAt().toLocalDate();
-        //구독자들에게 reservedTimes 갱신 전달
-        messagingTemplate.convertAndSend("/topic/reservations/" + date + "/reservedTimes",
-                getReservedTimes(date));
+//        //구독자들에게 reservedTimes 갱신 전달
+//        messagingTemplate.convertAndSend("/topic/reservations/" + date + "/reservedTimes",
+//                getReservedTimes(date));
+//
+        System.out.println("event publish before");
+                
+        applicationEventPublisher.publishEvent(new ReservationEvent(reservation));
+        System.out.println("after");
     }
 
     //마감된 날짜 조회

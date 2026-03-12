@@ -23,7 +23,8 @@ public class Reservation {
     private LocalDateTime endAt;
 
     @Enumerated(EnumType.STRING)
-    private Status status;
+    @Column(nullable = false)
+    private Status status= Status.RESERVED;
 
     @CreationTimestamp
     @Column(name="created_at", updatable = false)
