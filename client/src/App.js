@@ -22,10 +22,8 @@ function App() {
     const client = new Client({
       brokerURL: "ws://localhost:8080/ws",
       onConnect: () => {
-        console.log("연결시작")
         client.subscribe('/topic/reservation', (message) => {
           const data = JSON.parse(message.body);
-          console.log(data);
           setReservedDates(data.reservedDates);
         })
       }
@@ -47,7 +45,7 @@ function App() {
   }, []);
 
   //예약마감된 날짜 표시
-  const dayPropGetter = (date) => {
+  const dayPropGetter = (date) => {//Date 타입
     const isReserved = reservedDates.includes(dayjs(date).format("YYYY-MM-DD"));
     if (isReserved) {
       return {
@@ -60,9 +58,13 @@ function App() {
   }
 
   const handleDateClick = ({ start }) => {
-    setSelectedDate(start)
-    if (reservedDates.includes(dayjs(start).format("YYYY-MM-DD"))) return;
-    setIsOpen(true)
+    // setSelectedDate(start)
+    // if (reservedDates.includes(dayjs(start).format("YYYY-MM-DD"))) return;
+    // setIsOpen(true)
+    const dateStr = dayjs(start).format("YYYY-MM-DD");
+    setSelectedDate(dateStr);
+    if (reservedDates.includes(dateStr)) return;
+    setIsOpen(true);
   }
 
   return (

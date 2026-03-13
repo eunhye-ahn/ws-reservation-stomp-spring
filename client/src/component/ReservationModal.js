@@ -7,22 +7,20 @@ const ReservationModal = ({ date, client, onClose }) => {
     const [reservedTimes, setReservedTimes] = useState([]);
     const [selectedTime, setSelectedTime] = useState(null);
 
-    // const { stompRef, subscribe } = useStomp();
-
+    //stomp 구독
     useEffect(() => {
-        const selectedDate = dayjs(date).format("YYYY-MM-DD");
-        client.subscribe(`/topic/reservation/${selectedDate}`, (message) => {
+        const subscription = client.subscribe(`/topic/reservation/${date}`, (message) => {
             const data = JSON.parse(message.body);
-            console.log(data.reservedTimes);
             setReservedTimes(data.reservedTimes);
-            console.log(data.re)
         })
+
+        return () => subscription.unsubscribe(); //cleanup
     }, [date]);
 
-    const fetchReservedTimes = async (date) => {
+    //fetch-마감시간조회
+    const fetchReservedTimes = async () => {
         try {
-            const selectedDate = dayjs(date).format("YYYY-MM-DD")
-            const res = await fetch(`http://localhost:8080/api/reservations/reservedTimes?date=${selectedDate}`);
+            const res = await fetch(`http://localhost:8080/api/reservations/reservedTimes?date=${date}`);
             const data = await res.json();
             setReservedTimes(data.reservedTimes);
         } catch (err) {
@@ -31,17 +29,17 @@ const ReservationModal = ({ date, client, onClose }) => {
     }
 
     useEffect(() => {
-        fetchReservedTimes(date)
-        setSelectedTime(null)
+        fetchReservedTimes();
+        setSelectedTime(null);
     }, []);
 
 
-    //예약생성
+    //fetch-예약생성
     const fetchCreateReservation = async (time) => {
         const res = await fetch("http://localhost:8080/api/reservations", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ start_at: `${dayjs(date).format("YYYY-MM-DD")}T${time}` })
+            body: JSON.stringify({ start_at: `${date}T${time}` })
         });
     }
 
