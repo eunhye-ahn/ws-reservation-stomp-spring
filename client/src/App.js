@@ -18,19 +18,6 @@ function App() {
   const clientRef = useRef(null);
 
   useEffect(() => {
-    //stomp 연결 초기화 (앱 진입시 1회)
-    const client = new Client({
-      brokerURL: "ws://localhost:8080/ws",
-      onConnect: () => {
-        client.subscribe('/topic/reservation', (message) => {
-          const data = JSON.parse(message.body);
-          setReservedDates(data.reservedDates);
-        })
-      }
-    });
-    client.activate();
-    clientRef.current = client;
-
     const fetchReservedDates = async () => {
       try {
         const res = await fetch('http://localhost:8080/api/reservations/reservedDates');
@@ -41,7 +28,33 @@ function App() {
       }
 
     }
+
+    const client = new Client({
+      brokerURL: "ws://localhost:8080/ws",
+      reconnectDelay: 5000,
+      onConnect: () => {
+        client.subscribe('/topic/reservation', (message) => {
+          try {
+            const data = JSON.parse(message.body);
+            setReservedDates(data.reservedDates);
+          } catch (e) {
+            console.error(err);
+          }
+        })
+      },
+      onStompError: () => {
+        fetchReservedDates();
+      },
+      onDisconnect: () => {
+        if (!client.active) fetchReservedDates();
+      }
+    });
+    client.activate();
+    clientRef.current = client;
+
     fetchReservedDates();
+
+    return () => client.deactivate();
   }, []);
 
   //예약마감된 날짜 표시
@@ -58,9 +71,6 @@ function App() {
   }
 
   const handleDateClick = ({ start }) => {
-    // setSelectedDate(start)
-    // if (reservedDates.includes(dayjs(start).format("YYYY-MM-DD"))) return;
-    // setIsOpen(true)
     const dateStr = dayjs(start).format("YYYY-MM-DD");
     setSelectedDate(dateStr);
     if (reservedDates.includes(dateStr)) return;

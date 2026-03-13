@@ -9,11 +9,18 @@ const ReservationModal = ({ date, client, onClose }) => {
 
     //stomp 구독
     useEffect(() => {
-        const subscription = client.subscribe(`/topic/reservation/${date}`, (message) => {
-            const data = JSON.parse(message.body);
-            setReservedTimes(data.reservedTimes);
+        if (!client || !client.connected) {
+            fetchReservedTimes(date);
+            return;
+        }
+        subscription = client.subscribe(`/topic/reservation/${date}`, (message) => {
+            try {
+                const data = JSON.parse(message.body);
+                setReservedTimes(data.reservedTimes);
+            } catch (err) {
+                console.err(err);
+            }
         })
-
         return () => subscription.unsubscribe(); //cleanup
     }, [date]);
 
