@@ -47,11 +47,6 @@ public class ReservationService {
         //리포지토리의 세이브 호출
         reservationRepository.save(reservation);
 
-        LocalDate date = request.getStartAt().toLocalDate();
-//        //구독자들에게 reservedTimes 갱신 전달
-//        messagingTemplate.convertAndSend("/topic/reservations/" + date + "/reservedTimes",
-//                getReservedTimes(date));
-//
         applicationEventPublisher.publishEvent(new ReservationEvent(reservation));
     }
 
