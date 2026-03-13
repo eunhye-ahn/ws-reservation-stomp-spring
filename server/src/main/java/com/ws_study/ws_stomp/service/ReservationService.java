@@ -25,8 +25,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ReservationService {
     private final ReservationRepository reservationRepository;
-    private final SimpMessagingTemplate messagingTemplate;
     private final ApplicationEventPublisher applicationEventPublisher;
+
     @Transactional
     public void save(ReservationRequestDto request) {
         Reservation reservation = new Reservation();
@@ -52,10 +52,7 @@ public class ReservationService {
 //        messagingTemplate.convertAndSend("/topic/reservations/" + date + "/reservedTimes",
 //                getReservedTimes(date));
 //
-        System.out.println("event publish before");
-                
         applicationEventPublisher.publishEvent(new ReservationEvent(reservation));
-        System.out.println("after");
     }
 
     //마감된 날짜 조회
@@ -71,7 +68,7 @@ public class ReservationService {
     }
 
     //마감된 시간조회
-    public ReservedTimesResponseDto getReservedTimes(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
+    public ReservedTimesResponseDto getReservedTimes(LocalDate date) {
         List<LocalTime> reservedTimes = reservationRepository.findAll()
                 .stream()
                 .filter(r -> r.getStartAt().toLocalDate().equals(date))

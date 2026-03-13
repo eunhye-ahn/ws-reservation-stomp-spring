@@ -23,8 +23,8 @@ public class ReservationController {
 
     //예약생성
     @PostMapping
-    public ResponseEntity<Void> create(@RequestBody ReservationRequestDto reservationRequestDto) {
-        reservationService.save(reservationRequestDto);
+    public ResponseEntity<Void> create(@RequestBody ReservationRequestDto request) {
+        reservationService.save(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -37,6 +37,7 @@ public class ReservationController {
                 .body(response);
     }
 
+    //@RequestParam : LocalDate 선언하면 쿼리스트링 자동파싱
     //마감된 시간 조회
     @GetMapping("reservedTimes")
     public ResponseEntity<?> getReservedTimes(@RequestParam LocalDate date) {
