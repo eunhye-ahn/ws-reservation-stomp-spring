@@ -26,7 +26,7 @@
 
 **해결**
 - `@TransactionalEventListener`로 커밋 이후에 메시지 발행되도록 변경
-- 해당 메서드에 `@Transactional(propagation = REQUIRES_NEW)` 적용
+- 해당 메서드에 `@Transactional` 적용
 
 ---
 
