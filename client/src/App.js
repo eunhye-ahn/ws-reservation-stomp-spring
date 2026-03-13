@@ -37,15 +37,17 @@ function App() {
           try {
             const data = JSON.parse(message.body);
             setReservedDates(data.reservedDates);
-          } catch (e) {
+          } catch (err) {
             console.error(err);
           }
         })
       },
       onStompError: () => {
+        console.log("[STOMP Error] fallback to HTTP");
         fetchReservedDates();
       },
       onDisconnect: () => {
+        console.log("[STOMP Disconnect] fallback to HTTP");
         if (!client.active) fetchReservedDates();
       }
     });

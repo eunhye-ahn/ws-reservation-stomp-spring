@@ -7,25 +7,8 @@ const ReservationModal = ({ date, client, onClose }) => {
     const [reservedTimes, setReservedTimes] = useState([]);
     const [selectedTime, setSelectedTime] = useState(null);
 
-    //stomp 구독
-    useEffect(() => {
-        if (!client || !client.connected) {
-            fetchReservedTimes(date);
-            return;
-        }
-        subscription = client.subscribe(`/topic/reservation/${date}`, (message) => {
-            try {
-                const data = JSON.parse(message.body);
-                setReservedTimes(data.reservedTimes);
-            } catch (err) {
-                console.err(err);
-            }
-        })
-        return () => subscription.unsubscribe(); //cleanup
-    }, [date]);
-
     //fetch-마감시간조회
-    const fetchReservedTimes = async () => {
+    const fetchReservedTimes = async (date) => {
         try {
             const res = await fetch(`http://localhost:8080/api/reservations/reservedTimes?date=${date}`);
             const data = await res.json();
@@ -35,11 +18,33 @@ const ReservationModal = ({ date, client, onClose }) => {
         }
     }
 
+    //stomp 구독
     useEffect(() => {
-        fetchReservedTimes();
+        fetchReservedTimes(date);
         setSelectedTime(null);
-    }, []);
+        if (!client || !client.connected) {
+            console.warn("[STOMP 연결 안됨]");
+            return;
+        }
+        const subscription = client.subscribe(`/topic/reservation/${date}`, (message) => {
+            try {
+                const data = JSON.parse(message.body);
+                setReservedTimes(data.reservedTimes);
+            } catch (err) {
+                console.error(err);
+            }
+        });
 
+        client.onStompError = () => {
+            console.log("[STOMP Error] fallback to HTTP");
+            fetchReservedTimes(date);
+        }
+        client.onDisconnect = () => {
+            console.warn("[STOMP Disconnect] fallback to HTTP");
+            fetchReservedTimes(date);
+        }
+        return () => subscription?.unsubscribe();
+    }, [date]);
 
     //fetch-예약생성
     const fetchCreateReservation = async (time) => {
@@ -48,6 +53,17 @@ const ReservationModal = ({ date, client, onClose }) => {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ start_at: `${date}T${time}` })
         });
+        if (!res.ok) {
+            const data = await res.json();
+            switch (data.code) {
+                case "DUPLICATE_RESERVATION":
+                    throw new Error(data.message);
+                case "MISSING_START_AT":
+                    throw new Error(data.message);
+                default:
+                    throw new Error(data.message);
+            }
+        }
     }
 
     const handleTimeClick = async (time) => {
@@ -56,7 +72,8 @@ const ReservationModal = ({ date, client, onClose }) => {
             setSelectedTime(null)
             onClose()
         } catch (err) {
-            console.error(err)
+            console.error(err);
+
         }
     }
 
