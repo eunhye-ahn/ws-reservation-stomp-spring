@@ -51,3 +51,18 @@
 
 - **클라이언트**
   - 서버 데이터 저장 시 `"yyyy-MM-dd"`로 변환 후 배열에 담고, 캘린더 클릭 이벤트의 Date 객체도 동일 포맷으로 변환해 `includes()` 비교
+
+---
+
+### 중복예약방지로직 변경
+
+**문제**
+> `existsBy` 만으로는 동시 요청 시 중복 예약이 저장될 수 있음
+
+**원인**
+- 트랜잭션 A가 `save()` 하기 전에 트랜잭션 B가 `existsBy()`를 실행하면 둘 다 없다고 판단하는 Race Condition 발생
+
+**해결**
+- `existsBy()` 중복 체크 코드 제거
+- `Reservation.startAt`에 `@Column(unique = true)` 추가
+- `DataIntegrityViolationException` catch로 중복 예외 처리
