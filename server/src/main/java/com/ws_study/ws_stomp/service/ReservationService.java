@@ -10,6 +10,7 @@ import com.ws_study.ws_stomp.repository.ReservationRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -29,20 +30,22 @@ public class ReservationService {
 
     @Transactional
     public void save(ReservationRequestDto request) {
-        Reservation reservation = new Reservation();
 
-        //중복체크
-        //existBy~는 boolean을 반환 -> 무조건 조건문
-        if(reservationRepository.existsByStartAt(request.getStartAt())){
-            throw ReservationException.duplicated();
-        }
         //dto 누락
         if(request.getStartAt()==null){
             throw ReservationException.missingStartAt();
         }
-        //endAt계산, Entity변환
+
+        Reservation reservation = new Reservation();
         reservation.setStartAt(request.getStartAt());
         reservation.setEndAt(request.getStartAt().plusHours(1));
+
+        //existsBy 대신 db유니크로 중복예약 처리
+        try{
+            reservationRepository.save(reservation);
+        }catch(DataIntegrityViolationException e){
+            throw ReservationException.duplicated();
+        }
 
         //리포지토리의 세이브 호출
         reservationRepository.save(reservation);

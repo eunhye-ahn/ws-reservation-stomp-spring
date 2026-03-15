@@ -12,10 +12,6 @@ import java.util.List;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Integer> {
-    //증복체크
-    @Query("select count(r)>0 from Reservation r where r.startAt = :startAt")
-    boolean existsByStartAt(@Param("startAt") LocalDateTime startAt);
-
     //예약된 날짜 조회->
     // db에서 변환안한 이유 : cast결과가 java.sql.Date로 반환되는데 LocalDate로 자동변환이 안돼서
 //    @Query("select distinct cast(r.startAt as date) from Reservation r")
